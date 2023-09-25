@@ -44,6 +44,9 @@
 				},
 				{
 					"name": "Won"
+				},
+				{
+					"name": "select1"
 				}
 			],
 			"scriptLines": [
@@ -102,7 +105,21 @@
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> JoinMatchMatchresultInningScoreCard",
 				"JoinMatchMatchresultInningScoreCard filter(and(Result=='WON', InningID ==' 1')) ~> Won",
-				"Won sink(allowSchemaDrift: true,",
+				"Won select(mapColumn(",
+				"          MatchID = Match@MatchID,",
+				"          Season,",
+				"          TeamID,",
+				"          Result,",
+				"          Runs,",
+				"          MatchID = InningScoreCardCSV@MatchID,",
+				"          InningID,",
+				"          BattingTeamID,",
+				"          BowlingTeamID,",
+				"          Score",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     umask: 0022,",
 				"     preCommands: [],",
