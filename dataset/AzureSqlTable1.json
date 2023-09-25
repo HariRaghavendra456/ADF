@@ -1,0 +1,82 @@
+{
+	"name": "AzureSqlTable1",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabase",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "MatchID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "inningID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "OverNo",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "BallNO",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "BowlerID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "BatsmanID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "NonStrikerID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "ScoringTypeID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "BallTypeID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "Runs",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "DismissedPlayerID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "DismissalTypeID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "FielderID",
+				"type": "int",
+				"precision": 10
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "BallbyBallActivity"
+		}
+	}
+}
