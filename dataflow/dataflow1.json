@@ -1,0 +1,115 @@
+{
+	"name": "dataflow1",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "MatchCSV",
+						"type": "DatasetReference"
+					},
+					"name": "Match"
+				},
+				{
+					"dataset": {
+						"referenceName": "MatchResultCSV",
+						"type": "DatasetReference"
+					},
+					"name": "MatchResult"
+				},
+				{
+					"dataset": {
+						"referenceName": "InningScoreCardCSV",
+						"type": "DatasetReference"
+					},
+					"name": "InningScoreCardCSV"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DelimitedText1",
+						"type": "DatasetReference"
+					},
+					"name": "Won1stBattingCSV"
+				}
+			],
+			"transformations": [
+				{
+					"name": "MatchJoinMatchResult"
+				},
+				{
+					"name": "JoinMatchMatchresultInningScoreCard"
+				},
+				{
+					"name": "Won"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          MatchID as string,",
+				"          Season as string,",
+				"          MatchDate as string,",
+				"          Team1ID as string,",
+				"          Team2ID as string,",
+				"          PlayerOfMatchID as string,",
+				"          City as string,",
+				"          Venue as string,",
+				"          DLMethodApplied as string,",
+				"          TossWinningTeamID as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> Match",
+				"source(output(",
+				"          MatchID as string,",
+				"          TeamID as string,",
+				"          Result as string,",
+				"          Runs as string,",
+				"          Wickets as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> MatchResult",
+				"source(output(",
+				"          MatchID as string,",
+				"          InningID as string,",
+				"          BattingTeamID as string,",
+				"          BowlingTeamID as string,",
+				"          Score as string,",
+				"          Wickets as string,",
+				"          Balls as string,",
+				"          Wides as string,",
+				"          NoBalls as string,",
+				"          LegByes as string,",
+				"          Byes as string,",
+				"          OtherExtras as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> InningScoreCardCSV",
+				"Match, MatchResult join(Match@MatchID == MatchResult@MatchID",
+				"     && TossWinningTeamID == TeamID,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> MatchJoinMatchResult",
+				"MatchJoinMatchResult, InningScoreCardCSV join(TossWinningTeamID == BattingTeamID",
+				"     && Match@MatchID == InningScoreCardCSV@MatchID,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> JoinMatchMatchresultInningScoreCard",
+				"JoinMatchMatchresultInningScoreCard filter(and(Result=='WON', InningID ==' 1')) ~> Won",
+				"Won sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> Won1stBattingCSV"
+			]
+		}
+	}
+}
