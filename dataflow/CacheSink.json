@@ -1,0 +1,98 @@
+{
+	"name": "CacheSink",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "SqlTableCustomer",
+						"type": "DatasetReference"
+					},
+					"name": "GetMaxSurrogateKey"
+				},
+				{
+					"dataset": {
+						"referenceName": "customer1",
+						"type": "DatasetReference"
+					},
+					"name": "CustomerFiles"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "SqlTableCustomer",
+						"type": "DatasetReference"
+					},
+					"name": "SqlCustomerTable"
+				},
+				{
+					"name": "CustomerSkSink"
+				}
+			],
+			"transformations": [
+				{
+					"name": "AddedIndentity"
+				},
+				{
+					"name": "AdjustedSurrogateKey"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          customerSK as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'select max(customerSK) as customerSK from customer',",
+				"     format: 'query') ~> GetMaxSurrogateKey",
+				"source(output(",
+				"          CustomerID as string,",
+				"          CompanyName as string,",
+				"          SalesPerson as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> CustomerFiles",
+				"CustomerFiles keyGenerate(output(customerSK as long),",
+				"     startAt: 1L,",
+				"     stepValue: 1L) ~> AddedIndentity",
+				"AddedIndentity derive(customerSK = coalesce(customerSK + CustomerSkSink#outputs()[1].customerSK,customerSK)) ~> AdjustedSurrogateKey",
+				"AdjustedSurrogateKey sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          customerSK as integer,",
+				"          customerID as integer,",
+				"          companyName as string,",
+				"          SalesPerson as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          customerSK,",
+				"          customerID = CustomerID,",
+				"          companyName = CompanyName,",
+				"          SalesPerson",
+				"     )) ~> SqlCustomerTable",
+				"GetMaxSurrogateKey sink(validateSchema: false,",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     store: 'cache',",
+				"     format: 'inline',",
+				"     output: false,",
+				"     saveOrder: 1,",
+				"     mapColumn(",
+				"          customerSK",
+				"     )) ~> CustomerSkSink"
+			]
+		}
+	}
+}
