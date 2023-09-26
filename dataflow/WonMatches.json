@@ -29,7 +29,7 @@
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "DelimitedText1",
+						"referenceName": "overwritefile",
 						"type": "DatasetReference"
 					},
 					"name": "Won1stBattingCSV"
@@ -47,6 +47,9 @@
 				},
 				{
 					"name": "SelectColumns"
+				},
+				{
+					"name": "surrogateKey1"
 				}
 			],
 			"scriptLines": [
@@ -119,8 +122,22 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> SelectColumns",
-				"SelectColumns sink(allowSchemaDrift: true,",
+				"SelectColumns keyGenerate(output(Identity as long),",
+				"     startAt: 1L,",
+				"     stepValue: 1L) ~> surrogateKey1",
+				"surrogateKey1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
+				"     input(",
+				"          MatchID as string,",
+				"          Season as string,",
+				"          TeamID as string,",
+				"          Result as string,",
+				"          Runs as string,",
+				"          InningID as string,",
+				"          BattingTeamID as string,",
+				"          BowlingTeamID as string,",
+				"          Score as string",
+				"     ),",
 				"     umask: 0022,",
 				"     preCommands: [],",
 				"     postCommands: [],",
