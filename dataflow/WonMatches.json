@@ -1,5 +1,5 @@
 {
-	"name": "dataflow1",
+	"name": "WonMatches",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
@@ -104,7 +104,7 @@
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> JoinMatchMatchresultInningScoreCard",
-				"JoinMatchMatchresultInningScoreCard filter(and(Result=='WON', InningID ==' 1')) ~> Won",
+				"JoinMatchMatchresultInningScoreCard filter(Result=='WON') ~> Won",
 				"Won select(mapColumn(",
 				"          MatchID = Match@MatchID,",
 				"          Season,",
